@@ -50,11 +50,11 @@ class LiveStreamRepository(
     /**
      * Identify channel names from a user prompt using Gemini 3.5 Flash + Search Grounding
      */
-    suspend fun findChannelsWithAI(prompt: String): Result<List<String>> = withContext(Dispatchers.IO) {
+    suspend fun findChannelsWithAI(prompt: String, customApiKey: String?): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
-            val apiKey = BuildConfig.GEMINI_API_KEY
+            val apiKey = if (!customApiKey.isNullOrBlank()) customApiKey else BuildConfig.GEMINI_API_KEY
             if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-                return@withContext Result.failure(Exception("مفتاح API الخاص بـ Gemini غير مهيأ. يرجى إضافته عبر لوحة الأسرار (Secrets Panel) في AI Studio."))
+                return@withContext Result.failure(Exception("مفتاح API الخاص بـ Gemini غير مهيأ. يرجى إضافته ولصقه في قسم (إعدادات مفتاح الذكاء الاصطناعي) أدناه لجعل التشغيل والتعرف الصوتي يعمل فوراً."))
             }
 
             val systemInstructionText = """

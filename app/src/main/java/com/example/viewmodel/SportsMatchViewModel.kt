@@ -1,5 +1,6 @@
 package com.example.viewmodel
 
+import android.content.Context
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -15,6 +16,17 @@ class SportsMatchViewModel(application: Application) : AndroidViewModel(applicat
 
     companion object {
         const val TAG = "SportsMatchViewModel"
+    }
+
+    private val sharedPrefs = application.getSharedPreferences("iptv_assistant_prefs", Context.MODE_PRIVATE)
+
+    // Gemini API Key State Flow
+    private val _geminiApiKey = MutableStateFlow(sharedPrefs.getString("gemini_api_key", "") ?: "")
+    val geminiApiKey: StateFlow<String> = _geminiApiKey.asStateFlow()
+
+    fun saveGeminiApiKey(key: String) {
+        _geminiApiKey.value = key
+        sharedPrefs.edit().putString("gemini_api_key", key).apply()
     }
 
     // Initialize Room & Repository
@@ -136,7 +148,7 @@ class SportsMatchViewModel(application: Application) : AndroidViewModel(applicat
 
         viewModelScope.launch {
             // Step 1: Query Gemini AI for broadcasting channels
-            val aiResult = repository.findChannelsWithAI(transcript)
+            val aiResult = repository.findChannelsWithAI(transcript, geminiApiKey.value)
             aiResult.onSuccess { aiChannels ->
                 Log.d(TAG, "AI Recommended channels: $aiChannels")
                 _searchState.value = MatchSearchState.MatchingStreams

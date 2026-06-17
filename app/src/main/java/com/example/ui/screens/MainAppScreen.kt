@@ -79,6 +79,7 @@ fun MainAppScreen(
 
     val isListening by viewModel.sttManager.isListening.collectAsStateWithLifecycle()
     val micSoundLevel by viewModel.sttManager.soundLevel.collectAsStateWithLifecycle()
+    val geminiApiKey by viewModel.geminiApiKey.collectAsStateWithLifecycle()
 
     // Permission Handler
     var hasMicPermission by remember {
@@ -219,6 +220,14 @@ fun MainAppScreen(
                         }
                         else -> {}
                     }
+                }
+
+                // Gemini API Configuration Card
+                item {
+                    GeminiApiKeyCard(
+                        savedKey = geminiApiKey,
+                        onKeySaved = { viewModel.saveGeminiApiKey(it) }
+                    )
                 }
 
                 // Audio microphone button area
@@ -1032,6 +1041,144 @@ fun NoMatchDisplayCard(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GeminiApiKeyCard(
+    savedKey: String,
+    onKeySaved: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var tempKey by remember(savedKey) { mutableStateOf(savedKey) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SpaceCardBg)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Toggle Gemini API Key configuration",
+                    tint = NeonGreen,
+                    modifier = Modifier.size(24.dp)
+                )
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "إعدادات مفتاح الذكاء الاصطناعي (Gemini Key)",
+                            color = TextWhite,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Right
+                        )
+                        Text(
+                            text = if (savedKey.isNotEmpty()) "تم حفظ مفتاح التشغيل بنجاح ✔" else "اضغط هنا للصق مفتاح Gemini API وتفعيل الذكاء الاصطناعي",
+                            color = if (savedKey.isNotEmpty()) NeonGreen else TextGray,
+                            fontSize = 11.sp,
+                            textAlign = TextAlign.Right
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Key Icon",
+                        tint = if (savedKey.isNotEmpty()) NeonGreen else TextGray,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            if (expanded) {
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = "لصق مفتاح Gemini API لتمكين المحلل الرياضي الصوتي والمزامنة:",
+                    color = TextWhite,
+                    fontSize = 11.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = {
+                            onKeySaved(tempKey.trim())
+                            expanded = false
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                        modifier = Modifier
+                            .height(44.dp)
+                            .testTag("save_api_key_button"),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Text("حفظ المفتاح", fontSize = 11.sp, color = SpaceDarkBg, fontWeight = FontWeight.Bold)
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextField(
+                        value = tempKey,
+                        onValueChange = { tempKey = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .testTag("gemini_api_key_input"),
+                        placeholder = {
+                            Text(
+                                text = "الصق مفتاح API الخاص بك هنا...",
+                                fontSize = 11.sp,
+                                color = TextGray,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Right
+                            )
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = SpaceDarkBg,
+                            unfocusedContainerColor = SpaceDarkBg,
+                            disabledContainerColor = SpaceDarkBg,
+                            focusedTextColor = TextWhite,
+                            unfocusedTextColor = TextWhite,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "ملاحظة: يمكنك الحصول على مفتاح مجاني تماماً من موقع Google AI Studio ولصقه هنا لمتابعة تشغيل وبحث الذكاء الاصطناعي فورا.",
+                    color = TextGray,
+                    fontSize = 10.sp,
+                    lineHeight = 15.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right
+                )
             }
         }
     }
