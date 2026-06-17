@@ -1,0 +1,6 @@
+{
+  "name": "المساعد الرياضي",
+  "description": "مساعد ذكي لمطابقة ومشاهدة قنوات بث المباريات عبر سيرفر Xtream Codes IPTV بواسطة الذكاء الاصطناعي والتحكم الصوتي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
